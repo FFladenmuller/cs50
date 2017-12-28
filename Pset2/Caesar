@@ -1,0 +1,99 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace CaesarCipher
+{
+    class Program
+    {
+        static char[] alphabet = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
+        'l', 'm', 'n', 'o', 'p','q','r','s','t','u','v','w','x','y','z'};
+        static int[] alphanumbers = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
+        ,17 ,18, 19, 20, 21, 22, 23, 24, 25, 26};
+
+        static void Main(string[] args)
+        {
+            string plaintext = GetPlainText();
+            int key = GetKey();
+            string answer = Encrypt(plaintext, key);
+            Console.WriteLine(answer);
+            Console.ReadLine();
+        }
+        static string GetPlainText()
+        {
+            Console.WriteLine("Enter a phrase to encrypt");
+            string result = Console.ReadLine();
+            return result;
+        }
+        static int GetKey()
+        {
+            Console.WriteLine("Enter a number key to encode with.");
+            int result = int.Parse(Console.ReadLine());
+            return result;
+        }
+        static string Encrypt(string plaintext, int key)
+        {
+            string ciphertext = shiftLetters(plaintext.ToLower(), key);
+            ciphertext = placeUpper(ciphertext, isUpper(plaintext));
+            return ciphertext;
+        }
+        static bool isLetter(char c)
+        {
+            bool isLetter = ((int)c >= 65 && (int)c <= 90 ||
+                    (int)c >= 97 && (int)c <= 122) ? true : false;
+            return isLetter;
+        }
+        static bool[] isUpper(string plaintext)
+        {
+            bool[] isUpper = new bool[plaintext.Length];
+            for (int i = 0; i < plaintext.Length; i++)
+            {
+                isUpper[i] = ((int)plaintext[i] <= 90) ? true : false;
+            }
+            return isUpper;
+        }
+        static string shiftLetters(string plaintext, int key)
+        {
+            char[] cipherarr = new char[plaintext.Length];
+            for (int i = 0; i < plaintext.Length; i++)
+            {
+                if (isLetter(plaintext[i]))
+                {
+                    cipherarr[i] = findShiftedChar(plaintext[i], key);
+                }
+                else
+                {
+                    cipherarr[i] = plaintext[i];
+                }
+            }
+            string ciphertext = new string(cipherarr);
+            return ciphertext;
+        }
+        static char findShiftedChar(char c, int key)
+        {
+            int ch = 0;
+            for (int i = 0; i < alphabet.Length; i++)
+            {
+                if(c == alphabet[i])
+                {
+                    ch = alphanumbers[i];
+                    break;
+                }
+            }
+            char newchar = ((ch + key) % 26 == 0) ? alphabet[25] : alphabet[((ch + key) % 26) - 1];
+            return newchar;
+        }
+        static string placeUpper(string ciphertext, bool[] isUpper)
+        {
+            char[] cipherarr = new char[ciphertext.Length];
+            for (int i = 0; i < ciphertext.Length; i++)
+            {
+                cipherarr[i] = (isUpper[i]) ? char.Parse(ciphertext[i].ToString().ToUpper()) : char.Parse(ciphertext[i].ToString());
+            }
+            ciphertext = new string(cipherarr); 
+            return ciphertext;
+        }
+    }
+}

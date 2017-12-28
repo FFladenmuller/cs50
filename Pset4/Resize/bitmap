@@ -1,0 +1,76 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.IO; 
+
+namespace ResizeAttempt2
+{
+    class Bitmap
+    {
+        public int BiWidth { get; set; } //Includes Pixels, not padding
+        public int BiHeight { get; set; }
+        public int BiSizeImage { get; set; }
+        public int BfSize { get; set; }
+        public int Padding { get; set; }
+        public const int BiHeaderSize = 54;
+        public float SizeMultiplier { get; set; }
+        public List<byte> Info { get; set; }
+
+        public void FindBiSizeImage()
+        {
+            this.BiSizeImage = ((3 * this.BiWidth) + this.Padding) * Math.Abs(this.BiHeight);
+        }
+        public void ResizeBiWidth()
+        {
+            this.BiWidth = (int)(this.BiWidth * SizeMultiplier);
+        }
+        public void ResizeBiHeight()
+        {
+            this.BiHeight = (int)(this.BiHeight * SizeMultiplier);
+        }   
+        public void FindPadding()
+        {
+            this.Padding = (4 - (this.BiWidth * 3) % 4) % 4;
+        }
+        public void FindBfSize()
+        {
+            this.BfSize = this.BiSizeImage + BiHeaderSize;
+        }
+        public void GetInfo(string address)
+        {
+            this.Info = File.ReadAllBytes(address).ToList();
+            this.BfSize = BitConverter.ToInt32(this.Info.ToArray(), 2);
+            this.BiWidth = BitConverter.ToInt32(this.Info.ToArray(), 18);
+            this.BiHeight = BitConverter.ToInt32(this.Info.ToArray(), 22);
+            FindBiSizeImage();
+            FindPadding();
+        }
+        public void AddHeaderInfo(Bitmap oldBMP, Bitmap newBMP)
+        {
+            for (int i = 0; i < 54; i++)
+            {
+                newBMP.Info.Add(oldBMP.Info[i]);
+            }
+            newBMP.Info = ChangeHeaderInfo(newBMP.Info, newBMP.BfSize, 2); //Update BfSize
+            newBMP.Info = ChangeHeaderInfo(newBMP.Info, newBMP.BiSizeImage, 34); //Update BiSizeImage
+            newBMP.Info = ChangeHeaderInfo(newBMP.Info, newBMP.BiWidth, 18);//Update BiWidth
+            newBMP.Info = ChangeHeaderInfo(newBMP.Info, newBMP.BiHeight, 22);//Update BiHeight
+        }
+        public List<byte> ChangeHeaderInfo(List<byte> info, int property, int index)
+        {
+            byte[] headerArr = BitConverter.GetBytes(property);
+            for (int i = 0; i < headerArr.Length; i++)
+            {
+                info[index++] = headerArr[i];
+            }
+            return info;
+        }
+        public void DisplayInfo()
+        {
+            Console.WriteLine("BiWidth:{0}, BiHeight:{1}, BiSize:{2}, BfSize:{3}, Padding:{4}",
+                        this.BiWidth, this.BiHeight, this.BiSizeImage, this.BfSize, this.Padding);
+        }
+    }
+}

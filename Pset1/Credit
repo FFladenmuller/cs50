@@ -1,0 +1,89 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace CreditCheck
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Please enter a credit card number.");
+            long cNumber = long.Parse(Console.ReadLine());
+            List<int> Digits = new List<int>();
+
+            Digits = getDigits(Digits, cNumber);
+            Digits = multiplyEveryTwo(cNumber, Digits);
+            Digits = getDigits(Digits); 
+            string result = (checkValid(Digits))
+            ? "The credit card number is valid." : "INVALID";
+
+            string company = checkCompany(cNumber.ToString());
+            Console.WriteLine(result);
+            Console.WriteLine(company);
+            Console.ReadLine();
+
+            
+
+        }
+
+        static private List<int> multiplyEveryTwo(long CreditNumber, List<int> Digits)
+        {
+            int cardLength = CreditNumber.ToString().Length;
+            for (int i = cardLength - 2; i >= 0; i -= 2)
+            {
+                    Digits[i] = Digits[i] * 2;
+                }
+
+            return Digits; 
+        }
+
+        static private List<int> getDigits(List<int> Digits, long CCNumber)
+        {
+                while (CCNumber > 0)
+                {
+                    Digits.Add((int)(CCNumber % 10));
+                    CCNumber /= 10; 
+
+                }
+            Digits.Reverse();
+            return Digits; 
+        }
+        static private List<int> getDigits(List<int> Digits)
+        {
+            List<int> DigitsTwo = new List<int>();
+            for (int i = 0; i < Digits.Count; i++)
+            {
+                while (Digits[i]> 0)
+                {
+                    DigitsTwo.Add(Digits[i] % 10);
+                    Digits[i] /= 10;
+
+                }
+            }
+            return DigitsTwo;
+        }
+
+        static private bool checkValid (List<int> Digits)
+        {
+            bool isValid = false;
+            isValid = (Digits.Sum() % 10 == 0) ? true : false; 
+            return isValid;
+        }
+
+        static private string checkCompany (string number)
+        {
+            number = number.Remove(2);
+            string result = "Company: ";
+            result += (number == "34" || number == "37") ?
+                     "Amex" : "";
+            result += (number == "51" || number == "52" ||
+                       number == "53" || number == "54" ||
+                       number == "55") ?
+                     "MasterCard" : "";
+            return result; 
+        }
+    }
+}

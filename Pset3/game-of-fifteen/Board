@@ -1,0 +1,85 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace GameOfFifteen
+{
+    public class Board
+    {
+        public int Dimensions { get; set; }
+        public string[,] PuzzlePieces { get; set; }
+        public BoardChecks boardChecker { get; set; }
+
+        public void getDimensions()
+        {
+            Console.WriteLine("Please enter a number that you would " +
+                              "like to be the width and height of the board.");
+            Dimensions = int.Parse(Console.ReadLine());
+        }
+        public void populateBoard()
+        {
+            string[,] puzzlepieces = new string[Dimensions, Dimensions];
+            int counter = (Dimensions * Dimensions) - 1;
+            for (int y = 0; y < Dimensions; y++)
+            {
+                for (int x = 0; x < Dimensions; x++)
+                {
+                    if (y == Dimensions - 1 && x == Dimensions - 1)
+                    {
+                        puzzlepieces[x, y] = "_";
+                    }
+                    else
+                    {
+                        puzzlepieces[x, y] = counter.ToString();
+                        counter--;
+                    }
+                }
+            }
+            if (boardChecker.isEven(Dimensions)) { oddNumberOfTilesFix(puzzlepieces); }
+            PuzzlePieces = puzzlepieces;
+        }
+        public void displayBoard()
+        {
+            for (int y = 0; y < Dimensions; y++)
+            {
+                bool spacedover = boardChecker.spacedOver(y, PuzzlePieces, Dimensions);
+                if (spacedover) { Console.Write(" "); }
+                for (int x = 0; x < Dimensions; x++)
+                {
+                    displayBoardFormatter(x, y);
+                }
+                Console.WriteLine();
+            }
+        }
+        private string[,] oddNumberOfTilesFix(string[,] puzzlePieces)
+        {
+            if (Dimensions > 2)
+            {
+                puzzlePieces[Dimensions - 3, Dimensions - 1] = "1";
+                puzzlePieces[Dimensions - 2, Dimensions - 1] = "2";
+            }
+            if (Dimensions == 2)
+            {
+                puzzlePieces[1, 0] = "1";
+                puzzlePieces[0, 1] = "2";
+            }
+
+            return puzzlePieces;
+        }
+        private void displayBoardFormatter(int x, int y)
+        {
+            if (y > 0 && boardChecker.lineAboveHasDoubleDigits(x, y, PuzzlePieces, Dimensions) && x < Dimensions - 1 && PuzzlePieces[x + 1, y].Count() == 1
+             || y > 1 && boardChecker.lineAboveHasDoubleDigits(x, y - 1, PuzzlePieces, Dimensions) && x < Dimensions - 1 && PuzzlePieces[x + 1, y].Count() == 1)
+                {
+                    Console.Write(PuzzlePieces[x, y] + "  ");
+                }
+            
+            else
+            {
+                Console.Write(PuzzlePieces[x, y] + " ");
+            }
+        }
+    }
+}

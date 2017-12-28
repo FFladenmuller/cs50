@@ -1,0 +1,53 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace GameOfFifteen
+{
+     public class BoardChecks
+    {
+         public bool spacedOver(int y, string[,] puzzlePieces, int Dimensions)
+        {
+            bool spacedOver = false;
+            if (y > 0 && lineAboveHasDoubleDigits(0, y, puzzlePieces, Dimensions) && puzzlePieces[0, y].Count() == 1)
+            {
+                spacedOver = true;
+            }
+            if (y > 1 && lineAboveHasDoubleDigits(0, y - 1, puzzlePieces, Dimensions) && puzzlePieces[0, y].Count() == 1)
+            {
+                spacedOver = true;
+            }
+            return spacedOver;
+        }
+         public bool lineAboveHasDoubleDigits(int x, int y, string[,] puzzlePieces, int Dimensions)
+        {
+            bool doubledigits = false;
+            for (int checkXForDoubleDigits = 0; checkXForDoubleDigits < Dimensions; checkXForDoubleDigits++)
+            {
+                doubledigits = (puzzlePieces[checkXForDoubleDigits, y - 1].Count() > 1) ? true : false;
+                if (doubledigits) { break; }
+            }
+            return doubledigits;
+        }
+         public bool isEven(int Dimensions)
+        {
+            bool isEven = (Dimensions % 2 == 0) ? true : false;
+            return isEven;
+        }
+         public bool legalMove(string number, Board board, int x, int y)
+        {
+            Player myPlayer = new Player();
+            bool legalMove = false;
+            if (x > 0 && number == board.PuzzlePieces[x - 1, y]
+            || y > 0 && number == board.PuzzlePieces[x, y - 1]
+            || x < board.Dimensions - 1 && number == board.PuzzlePieces[x + 1, y]
+            || y < board.Dimensions - 1 && number == board.PuzzlePieces[x, y + 1])
+            {
+                legalMove = true;
+            }
+            return legalMove;
+        }
+    }
+}

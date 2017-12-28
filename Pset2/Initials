@@ -1,0 +1,41 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Initials
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Enter a name.");
+            string Result = Console.ReadLine();
+            Result = RemoveExtraSpaces(Result);
+            string[] names = Result.Split(' ');
+
+            for (int i = 0; i < names.Length; i++)
+            {
+                names[i] = names[i].First().ToString().ToUpper();
+            }
+            foreach(string name in names)
+            {
+                Console.Write(name);
+            }
+            Console.ReadLine();
+        }
+        static string RemoveExtraSpaces(string s)
+        {
+            s = s.Trim(' ');
+           for (int i = 0; i < s.Length; i++)
+            {
+                while(s[i] == ' ' && s[i + 1] == ' ')
+                {
+                    s = s.Remove(i, 1);
+                }
+            }
+            return s; 
+        }
+    }
+}

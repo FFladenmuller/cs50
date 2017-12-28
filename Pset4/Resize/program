@@ -1,0 +1,167 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using ResizeAttempt2.Exceptions;
+using System.IO; 
+
+namespace ResizeAttempt2
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            float sizeMultiplier = getSizeChange();
+            Bitmap oldBMP = new Bitmap();
+            Bitmap newBMP = new Bitmap() { Info = new List<byte>() };
+            oldBMP.GetInfo(getBMPToResizeAddress());
+            UpdateHeaderInfo(oldBMP, newBMP, sizeMultiplier);
+            if (useUpsize(oldBMP, sizeMultiplier))
+            {
+                Upsize(oldBMP, newBMP, (int)sizeMultiplier);
+            }
+            else
+            {
+                nearestNeighborInterpolation(oldBMP, newBMP, sizeMultiplier);
+            }
+            CreateNewImage(newBMP);
+        }
+        static float getSizeChange()
+        {
+            Console.WriteLine("Enter a multiplier that you would like to change the picture by.");
+            float size = 0;
+            try
+            {
+                if (!float.TryParse(Console.ReadLine(), out size))
+                {
+                    throw new InvalidSizeMultiplierException();
+                }
+            }
+            catch (InvalidSizeMultiplierException)
+            {
+                Console.Clear();
+                Console.WriteLine("Invalid value entered. Please enter a numeric value.");
+                size = getSizeChange();
+            }
+            return size;
+        }
+        static string getBMPToResizeAddress()
+        {
+            Console.Clear();
+            Console.WriteLine("Please enter an item in your downloads folder to change.");
+            string result = Console.ReadLine();
+            try
+            {
+                result = string.Format(@"C: \Users\frede\Downloads\{0}.bmp", result);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                result = getBMPToResizeAddress();
+            }
+            return result;
+        }
+        static bool useUpsize(Bitmap oldBMP, float sizeMultiplier)
+        {
+            if(oldBMP.BiWidth * Math.Abs(oldBMP.BiHeight) < 1000 && sizeMultiplier >= 1)
+            {
+                return true;
+            }
+            else { return false; }
+        }
+        static void UpdateHeaderInfo(Bitmap oldBMP,Bitmap newBMP, float sizeMultiplier)
+         {
+            newBMP.SizeMultiplier = sizeMultiplier;
+            newBMP.BiHeight = oldBMP.BiHeight;
+            newBMP.BiWidth = oldBMP.BiWidth;
+            newBMP.ResizeBiHeight();
+            newBMP.ResizeBiWidth();
+            newBMP.FindPadding();
+            newBMP.FindBiSizeImage();
+            newBMP.FindBfSize();
+            newBMP.AddHeaderInfo(oldBMP, newBMP);
+        }
+        static void Upsize(Bitmap oldBMP, Bitmap newBMP, int sizeMultiplier)
+        {
+            int index = 54;
+            for (int y = 0; y < Math.Abs(oldBMP.BiHeight); y++)
+            {
+                List<byte> tempLine = new List<byte>();
+                for (int x = 0; x < oldBMP.BiWidth; x++)
+                {
+                        for (int k = 0; k < sizeMultiplier; k++)
+                        {
+                            newBMP.Info.Add(oldBMP.Info[index]);
+                            newBMP.Info.Add(oldBMP.Info[index + 1]);
+                            newBMP.Info.Add(oldBMP.Info[index + 2]);
+                            tempLine.Add(oldBMP.Info[index]);
+                            tempLine.Add(oldBMP.Info[index + 1]);
+                            tempLine.Add(oldBMP.Info[index + 2]);
+                    }
+                    index = (x == oldBMP.BiWidth - 1) ? index + 3 + oldBMP.Padding : index + 3;
+                }
+                for (int l = 0; l < newBMP.Padding; l++)
+                {
+                    newBMP.Info.Add(0);
+                    tempLine.Add(0);
+                }
+                for (int i = 1; i < sizeMultiplier; i++)
+                {
+                    newBMP.Info.AddRange(tempLine);
+                }
+            }
+        }
+        static byte[,][] get2dByteArr(Bitmap oldBMP)
+        {
+            byte[,][] RGBTriples = new byte[oldBMP.BiWidth, Math.Abs(oldBMP.BiHeight)][];
+            int index = 54;
+            for (int y = 0; y < Math.Abs(oldBMP.BiHeight); y++)
+            {
+                for (int x = 0; x < oldBMP.BiWidth; x++)
+                {
+                    byte[] b = new byte[3];
+                    b[0] = oldBMP.Info[index];
+                    b[1] = oldBMP.Info[index + 1];
+                    b[2] = oldBMP.Info[index + 2];
+                    RGBTriples[x, y] = b;
+                    index = (x == oldBMP.BiWidth - 1) ? index + 3 + oldBMP.Padding : index + 3;
+                }
+            }
+            return RGBTriples;
+        }
+        static void nearestNeighborInterpolation(Bitmap oldBMP, Bitmap newBMP, float sizeMultiplier)
+        {
+            byte[,][] oldRGBTriples = get2dByteArr(oldBMP);
+            for (int y = 0; y < Math.Abs(newBMP.BiHeight); y++)
+            {
+                for (int x = 0; x < newBMP.BiWidth; x++)
+                {
+                    int sourceX = (int)Math.Round((double)x / (double)newBMP.BiWidth * (double)oldBMP.BiWidth);
+                    int sourceY = (int)Math.Round((double)y / (double)Math.Abs(newBMP.BiHeight) * (double)Math.Abs(oldBMP.BiHeight));
+                    sourceX = (sourceX >= oldBMP.BiWidth) ? oldBMP.BiWidth - 1 : sourceX;
+                    sourceY = (sourceY >= oldBMP.BiHeight) ? Math.Abs(oldBMP.BiHeight) - 1 : sourceY;
+                    newBMP.Info.AddRange(oldRGBTriples[sourceX, sourceY].ToList());
+                }
+                for (int l = 0; l < newBMP.Padding; l++)
+                {
+                    newBMP.Info.Add(0);
+                }
+            }
+        }        
+        static void CreateNewImage(Bitmap newBMP)
+        {
+            try
+            {
+                File.WriteAllBytes(@"C: \Users\frede\Downloads\newImage.bmp", newBMP.Info.ToArray());
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine("Something went wrong.");
+                Console.WriteLine(ex.ToString());
+                Console.ReadLine();
+            }
+        }
+    }
+
+}

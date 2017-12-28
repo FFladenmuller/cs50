@@ -1,0 +1,81 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace SortingAlgorithms
+{
+    class CountingSort
+    {
+        public static void Counting_Sort()
+        {
+            int n = getNumbers();
+            int max = getMax();
+            DateTime beforeSort = DateTime.Now;
+            int[] unsorted = getRandomNumbers(n, max);
+            int[] countingarr = getCounted(unsorted, max);
+            int[] sortedarr = getSorted(countingarr, n);
+            DateTime afterSort = DateTime.Now;
+            TimeSpan sortingTime = afterSort - beforeSort;
+            Console.WriteLine("It took {0} Milliseconds to sort these numbers.", sortingTime.Milliseconds);
+            Console.ReadLine();
+
+        }
+        static int getNumbers()
+        {
+            Console.WriteLine("Please enter how many numbers you would like to sort.");
+            int n = int.Parse(Console.ReadLine());
+            return n;
+        }
+        static int getMax()
+        {
+            Console.WriteLine("What is the Maximum value of this list?");
+            int max = int.Parse(Console.ReadLine());
+            return max;
+        }
+        static Random rnd = new Random();
+        static int[] getRandomNumbers(int n, int max)
+        {
+            int[] unsorted = new int[n];
+            for (int i = 0; i < n; i++)
+            {
+                unsorted[i] = rnd.Next(0, max + 1);
+            }
+            return unsorted;
+        }
+        static int[] getCounted(int[] unsorted, int max)
+        {
+            int j = 0;
+            int[] countingarr = new int[max + 1];
+            for (int i = 0; i < unsorted.Length; i++)
+            {
+                j = unsorted[i];
+                countingarr[j]++;
+            }
+            return countingarr;
+        }
+        static int[] getSorted(int[] countingarr, int n)
+        {
+            int[] sortedarr = new int[n];
+            int j = 0;
+            for (int i = 0; i < countingarr.Length; i++)
+            {
+                while (countingarr[i] > 0)
+                {
+                    sortedarr[j++] = i;
+                    countingarr[i]--;
+                }
+            }
+            return sortedarr;
+        }
+        static void printNumbers(int[] arr)
+        {
+            Console.WriteLine("Numbers are: ");
+            foreach (int number in arr)
+            {
+                Console.WriteLine(number);
+            }
+        }
+    }
+}

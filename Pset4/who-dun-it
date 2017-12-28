@@ -1,0 +1,50 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Drawing;
+
+namespace WhoDunIt
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            string clue = @"C:\Users\frede\Downloads\clue.bmp";
+            string path = @"C:\Users\frede\Downloads\verdict2.bmp";
+
+
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+
+            byte[] info = File.ReadAllBytes(clue);
+            var newImageInfo = new List<byte>();
+            for (int i = 0; i < 54; i++)
+            {
+                newImageInfo.Add(info[i]);
+            }
+
+            string hexInImage = BitConverter.ToString(info);
+            string[] hexArray = hexInImage.Split('-');
+            for (int i = 54; i < info.Length - 2; i += 3)
+            {
+                string B = hexArray[i].ToLower();
+                string G = hexArray[i + 1].ToLower();
+                string R = hexArray[i + 2].ToLower(); 
+                if(B == "00" && G == "00" && R == "ff")
+                {
+                    B = "ff"; G = "ff";
+                }
+                newImageInfo.Add(Byte.Parse(int.Parse(B, System.Globalization.NumberStyles.HexNumber).ToString()));
+                newImageInfo.Add(Byte.Parse(int.Parse(G, System.Globalization.NumberStyles.HexNumber).ToString()));
+                newImageInfo.Add(Byte.Parse(int.Parse(R, System.Globalization.NumberStyles.HexNumber).ToString()));
+            }
+            File.WriteAllBytes(path, newImageInfo.ToArray());
+
+        }
+    }
+}

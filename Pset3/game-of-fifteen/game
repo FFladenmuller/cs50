@@ -1,0 +1,67 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace GameOfFifteen
+{
+    class Game
+    {
+        public void playGame()
+        {
+            Board gameBoard = new Board() { boardChecker = new BoardChecks() };
+            Player gamePlayer = new Player() { MoveChecker = new BoardChecks(), GameBoard = gameBoard}; 
+            gameBoard.getDimensions(); gameBoard.populateBoard();
+            bool Won = false;
+            while (!Won)
+            {
+                displayGreeting();
+                gamePlayer.Move();
+                Won = checkIfWon(gamePlayer.GameBoard);
+            }
+            Console.WriteLine("YOU WON!!!");
+            Console.ReadLine();
+        }
+        private void displayGreeting()
+        {
+            Console.Clear();
+            Console.WriteLine("WELCOME TO GAME OF 15");
+        }
+        private bool checkIfWon(Board board)
+        {
+            bool Won = false;
+            int max = 0; 
+            for (int y = 0; y < board.Dimensions; y++)
+            {
+                for (int x = 0; x < board.Dimensions; x++)
+                {
+                    if(board.PuzzlePieces[x, y] == "_" )
+                    {
+                        if (x == board.Dimensions -1  && y == board.Dimensions - 1)
+                        {
+                            Won = true;
+                        }
+                        else
+                        {
+                            Won = false;
+                            break;
+                        }
+                    }
+                    else if(int.Parse(board.PuzzlePieces[x,y]) > max)
+                    {
+                        max = int.Parse(board.PuzzlePieces[x, y]); 
+                        Won = true; 
+                    }
+                    else
+                    {
+                        Won = false;
+                        break;
+                    }
+                }
+                if (!Won) { break; }
+            }
+            return Won;
+        }
+    }
+}

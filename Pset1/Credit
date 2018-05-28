@@ -1,89 +1,127 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+#include <stdio.h>
+#include <cs50.h>
 
-namespace CreditCheck
+int getCardDigits(long long card);
+int getCheckSum(long long card, int digits);
+bool validCheckSum(int sum);
+void printCardType(long long card, int digits);
+
+int main(void)
 {
-    class Program
+    long long card = get_long_long("Card Number: \n");
+    int digits = getCardDigits(card);
+    int sum = getCheckSum(card, digits);
+    if (validCheckSum(sum))
     {
-        static void Main(string[] args)
+        printCardType(card, digits);
+    }
+    else
+    {
+        printf("INVALID\n");
+    }
+    return 0;
+}
+
+// Multiplies every other digit by 2, starting with the number’s second-to-last digit, and then adds those products' digits together.
+int getCheckSum(long long card, int digits)
+{
+    int i = 0;
+    int A[digits];
+    int B[digits];
+    // Populates array A with digits from card number.
+    while (card != 0)
+    {
+        A[i] = card % 10;
+        card /= 10;
+        i++;
+    }
+    // Populates array B with digits from array A in the correct order
+    i = 0;
+    for (int l = digits - 1; l >= 0; l--)
+    {
+        B[i++] = A[l];
+    }
+    int sum = 0;
+    // Multiplies and adds every other digit from the card, starting from second to last digit.
+    for (int j = digits - 2; j >= 0; j -= 2)
+    {
+        B[j] *= 2;
+        if (B[j] >= 10)
         {
-            Console.WriteLine("Please enter a credit card number.");
-            long cNumber = long.Parse(Console.ReadLine());
-            List<int> Digits = new List<int>();
-
-            Digits = getDigits(Digits, cNumber);
-            Digits = multiplyEveryTwo(cNumber, Digits);
-            Digits = getDigits(Digits); 
-            string result = (checkValid(Digits))
-            ? "The credit card number is valid." : "INVALID";
-
-            string company = checkCompany(cNumber.ToString());
-            Console.WriteLine(result);
-            Console.WriteLine(company);
-            Console.ReadLine();
-
-            
-
-        }
-
-        static private List<int> multiplyEveryTwo(long CreditNumber, List<int> Digits)
-        {
-            int cardLength = CreditNumber.ToString().Length;
-            for (int i = cardLength - 2; i >= 0; i -= 2)
+            while (B[j] != 0)
             {
-                    Digits[i] = Digits[i] * 2;
-                }
-
-            return Digits; 
-        }
-
-        static private List<int> getDigits(List<int> Digits, long CCNumber)
-        {
-                while (CCNumber > 0)
-                {
-                    Digits.Add((int)(CCNumber % 10));
-                    CCNumber /= 10; 
-
-                }
-            Digits.Reverse();
-            return Digits; 
-        }
-        static private List<int> getDigits(List<int> Digits)
-        {
-            List<int> DigitsTwo = new List<int>();
-            for (int i = 0; i < Digits.Count; i++)
-            {
-                while (Digits[i]> 0)
-                {
-                    DigitsTwo.Add(Digits[i] % 10);
-                    Digits[i] /= 10;
-
-                }
+                sum += B[j] % 10;
+                B[j] /= 10;
             }
-            return DigitsTwo;
         }
-
-        static private bool checkValid (List<int> Digits)
+        else
         {
-            bool isValid = false;
-            isValid = (Digits.Sum() % 10 == 0) ? true : false; 
-            return isValid;
+            sum +=B[j];
         }
+    }
+    // Adds digits to sum that were not multiplied
+    for (int k = digits - 1; k >= 0; k -= 2)
+    {
+        sum += B[k];
+    }
 
-        static private string checkCompany (string number)
-        {
-            number = number.Remove(2);
-            string result = "Company: ";
-            result += (number == "34" || number == "37") ?
-                     "Amex" : "";
-            result += (number == "51" || number == "52" ||
-                       number == "53" || number == "54" ||
-                       number == "55") ?
-                     "MasterCard" : "";
-            return result; 
-        }
+    return sum;
+}
+
+//Gets the number of digits in card number
+int getCardDigits(long long card)
+{
+    int digits = 0;
+    while (card != 0)
+    {
+        card /= 10;
+        digits++;
+    }
+    return digits;
+}
+
+//Checks that the sum is divisible by 10 evenly
+bool validCheckSum(int sum)
+{
+    bool valid = false;
+    if (sum % 10 == 0)
+    {
+        valid = true;
+    }
+    return valid;
+}
+
+//Prints the card type
+void printCardType(long long card, int digits)
+{
+    int i = 0;
+    int A[digits];
+    // Populates array A with digits from card number.
+    while (card != 0)
+    {
+        A[i] = card % 10;
+        card /= 10;
+        i++;
+    }
+    if ((A[digits - 1] == 4 && digits == 13) || (A[digits - 1] == 4 && digits == 16))
+    {
+        printf("VISA\n");
+    }
+    else if ((A[digits - 1] == 3 && A[digits - 2] == 4 && digits == 15) ||
+             (A[digits - 1] == 3 && A[digits - 2] == 7 && digits == 15))
+    {
+        printf("AMEX\n");
+    }
+    else if ((A[digits - 1] == 5 && A[digits - 2] == 1 && digits == 16) ||
+             (A[digits - 1] == 5 && A[digits - 2] == 2 && digits == 16) ||
+             (A[digits - 1] == 5 && A[digits - 2] == 3 && digits == 16) ||
+             (A[digits - 1] == 5 && A[digits - 2] == 4 && digits == 16) ||
+             (A[digits - 1] == 5 && A[digits - 2] == 5 && digits == 16))
+    {
+        printf("MASTERCARD\n");
+    }
+    else
+    {
+        printf("INVALID\n");
     }
 }

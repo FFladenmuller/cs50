@@ -3,10 +3,11 @@
 ## What's `stdint.h`?
 
 
-A header file in the C standard library introduced in the C99 standard library section 7.18
+> A header file in the C standard library introduced in the C99 standard library section 7.18
 to allow programmers to write more portable code by providing a set of typedefs that specify 
 exact-width integer types, together with the defined minimum and maximum allowable values for 
 each type, using macros.
+> - Wikibooks
 
 ## What's the point of using `uint8_t`, `uint32_t`, `int32_t`, and `uint16_t` in a program?
 

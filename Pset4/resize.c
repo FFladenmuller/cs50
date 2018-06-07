@@ -53,17 +53,18 @@ int main (int argc, char* argv[])
     // Write updated BITMAPFILEHEADER/BITMAPINFOHEADER to new file
     fwrite(&bf, sizeof(BITMAPFILEHEADER), 1, outptr);
     fwrite(&bi, sizeof(BITMAPINFOHEADER), 1, outptr);
+    // Line will hold copy of multiplied x pixel line to multiply each line f times
+    int linesize = (oldbi.biWidth * sizeof(RGBTRIPLE) * f) + (padding * sizeof(char));
+    BYTE *line = malloc(linesize);
+    BYTE *lineptr;
     // If upscaling image, repeat pixels. Only works for whole number input
+    lineptr = line;
     if (f > 1)
     {
         // Iterate over y
         for (int i = 0; i < abs(oldbi.biHeight); i++)
         {
-             // line will hold copy of multiplied x pixel line to multiply each line f times
-             int linesize = (oldbi.biWidth * sizeof(RGBTRIPLE) * f) + (padding * sizeof(char));
-             BYTE *line = malloc(linesize);
-             BYTE *lineptr = malloc(sizeof(BYTE*));
-             lineptr = line;
+             line = lineptr;
             // Iterate over x
             for (int j = 0; j < oldbi.biWidth; j++)
             {
@@ -98,9 +99,9 @@ int main (int argc, char* argv[])
             {
                 fwrite(lineptr, linesize, 1, outptr);
             }
-            free(line);
-            free(lineptr);
         }
+        fclose(inptr);
+        fclose(outptr);
     }
     // For inputs 1 or lower, use nearest neighbor interpolation
     else if (f <= 1)
@@ -121,11 +122,11 @@ int main (int argc, char* argv[])
         }
         // Write new picture using nearest neighbor interpolation
         // In essence, you imagine the width and height on x and y axis,
-        //with each pixel having its own percentage on the line. For the
-        //new image that is say, 10% down both the X and Y axis, such as
+        // With each pixel having its own percentage on the line. For the
+        // New image that is say, 10% down both the X and Y axis, such as
         // 1,1 in a 10 x 10 picture, you would pick the pixel that is closest
-        //to 10% down both its X and Y axis in the old picture to be resized.
-        //srcX and srcY calculate which pixel number you need.
+        // To 10% down both its X and Y axis in the old picture to be resized.
+        // SrcX and srcY calculate which pixel number you need.
         // Iterate over new pictures height
         int srcX; int srcY;
         for (int i = 0; i < abs(bi.biHeight); i++)
@@ -152,8 +153,9 @@ int main (int argc, char* argv[])
                 fputc(0x00, outptr);
             }
         }
-    }
      fclose(inptr);
      fclose(outptr);
-     return 0;
+    }
+    free(lineptr);
+    return 0;
 }

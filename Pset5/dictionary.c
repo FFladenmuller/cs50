@@ -64,6 +64,7 @@ bool load(const char *dictionary)
     if (inptr == NULL)
     {
         fprintf(stderr, "Dictionary could not be opened for reading.");
+        fclose(inptr);
         unload();
         return false;
     }

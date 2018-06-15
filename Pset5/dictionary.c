@@ -87,7 +87,6 @@ bool load(const char *dictionary)
         // If no linked list in corresponding element
         if (hashtable[element] == NULL)
         {
-            hashtable[element] = newNode;
             newNode -> next = NULL;
         }
         else

@@ -85,15 +85,7 @@ bool load(const char *dictionary)
         strcpy(newNode -> word, word);
         int element = hash(word);
         // Add node to linked list of element corresponding to hash code
-        // If no linked list in corresponding element
-        if (hashtable[element] == NULL)
-        {
-            newNode -> next = NULL;
-        }
-        else
-        {
-            newNode -> next = hashtable[element];
-        }
+        newNode -> next = hashtable[element];
         hashtable[element] = newNode;
         wordCount++;
     }

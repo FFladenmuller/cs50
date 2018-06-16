@@ -1,14 +1,10 @@
-// Implements a dictionary's functionality
-#include "node.h"
-#include <stdbool.h>
-#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "dictionary.h"
 
-#define HASHMAX 100000
+#define HASHMAX 130000
 
 node **hashtable;
 bool loaded = false;
@@ -18,13 +14,14 @@ int wordCount = 0;
 bool check(const char *word)
 {
     // Copy word into w
-    char *w = malloc(sizeof(char) * 46);
-    strcpy(w, word);
+    int l = strlen(word);
+    char *w = malloc(l + 1);
     // Ensure word is lowercase
-    for (int i = 0; w[i] != '\0'; i++)
+    for (int i = 0; i < l; i++)
     {
-        w[i] = tolower(w[i]);
+        w[i] = tolower(word[i]);
     }
+    w[l] = '\0';
     // Get hashcode for word
     int element = hash(w);
     // Check through the linked list at hashmax[element] for the word

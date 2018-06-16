@@ -1,3 +1,7 @@
+// Implements a dictionary's functionality
+#include "node.h"
+#include <stdbool.h>
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
